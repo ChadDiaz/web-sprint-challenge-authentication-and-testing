@@ -51,9 +51,21 @@ router.post(
       the response body should include a string exactly as follows: "username taken".
   */
 
-router.post("/login", (req, res) => {
-  res.end("implement login, please!");
-  /*
+router.post("/login", checkBodyData, checkUserNameExists, async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const user = User.getUserBy({ username }).first();
+    if (user && bcrypt.compareSync(password, user.password)) {
+      const token = generateToken(user);
+      res.status(200).json({ message: `welcome ${user.username}`, token });
+    } else {
+      res.status(401).json({ message: "invalid credentials" });
+    }
+  } catch (err) {
+    next(err);
+  }
+});
+/*
     IMPLEMENT
     You are welcome to build additional middlewares to help with the endpoint's functionality.
 
@@ -76,7 +88,6 @@ router.post("/login", (req, res) => {
     4- On FAILED login due to `username` not existing in the db, or `password` being incorrect,
       the response body should include a string exactly as follows: "invalid credentials".
   */
-});
 
 function generateToken(user) {
   const payload = {
