@@ -5,11 +5,27 @@ const {
   checkUserNameExists,
   checkUserNameFree,
 } = require("../config/middleware.js");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const { JWT_SECRET } = require("../config/secrets.js");
 
-router.post("/register",checkBodyData, checkUserNameFree, async (req, res, next) => {
-  res.end("implement register, please!");
-  /*
-});
+router.post(
+  "/register",
+  checkBodyData,
+  checkUserNameFree,
+  async (req, res, next) => {
+    const credentials = req.body;
+    try {
+      const hash = bcrypt.hashSync(credentials.password, 8);
+      credentials.password = hash;
+      const user = await User.register(credentials);
+      res.status(201).json(user);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+/*
     IMPLEMENT
     You are welcome to build additional middlewares to help with the endpoint's functionality.
     DO NOT EXCEED 2^8 ROUNDS OF HASHING!
@@ -61,5 +77,17 @@ router.post("/login", (req, res) => {
       the response body should include a string exactly as follows: "invalid credentials".
   */
 });
+
+function generateToken(user) {
+  const payload = {
+    sub: user.id,
+    username: user.username,
+  };
+  const options = {
+    expiresIn: "1h",
+  };
+  const secret = JWT_SECRET;
+  return jwt.sign(payload, secret, options);
+}
 
 module.exports = router;
