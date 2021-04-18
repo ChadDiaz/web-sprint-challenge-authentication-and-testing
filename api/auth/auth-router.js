@@ -9,6 +9,15 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { JWT_SECRETE } = require("../config/secrets.js");
 
+router.get("/", async (req, res, next) => {
+  try {
+    const users = await User.get();
+    res.status(200).json(users);
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.post(
   "/register",
   checkBodyData,
@@ -60,7 +69,6 @@ router.post(
 
     try {
       const user = await User.getUserBy({ username }).first();
-      console.log("user", user)
       if (user && bcrypt.compareSync(password, user.password)) {
         const token = generateToken(user);
         res.status(200).json({ message: `welcome ${user.username}`, token });
