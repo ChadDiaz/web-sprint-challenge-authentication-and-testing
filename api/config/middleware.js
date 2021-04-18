@@ -9,7 +9,7 @@ async function checkBodyData(req, res, next) {
   }
 }
 
-async function checkUserNameExists() {
+async function checkUserNameExists(req, res, next) {
   try {
     const user = await User.getUserBy({ username: req.body.username });
     if (user.length > 0) {
@@ -22,7 +22,7 @@ async function checkUserNameExists() {
   }
 }
 
-async function checkUserNameFree() {
+async function checkUserNameFree(req, res, next) {
   try {
     const user = await User.getUserBy({ username: req.body.username });
     if (user.length > 0) {
