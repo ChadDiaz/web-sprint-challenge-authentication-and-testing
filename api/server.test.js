@@ -2,6 +2,10 @@ const db = require("../data/dbConfig.js");
 const server = require("./server.js");
 const request = require("supertest");
 
+test("sanity", () => {
+  expect(true).toBe(false);
+});
+
 beforeAll(async () => {
   await db.migrate.rollback();
   await db.migrate.latest();
