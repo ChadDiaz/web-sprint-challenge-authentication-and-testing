@@ -7,7 +7,7 @@ const {
 } = require("../config/middleware.js");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { JWT_SECRET } = require("../config/secrets.js");
+const { JWT_SECRETE } = require("../config/secrets.js");
 
 router.post(
   "/register",
@@ -51,20 +51,27 @@ router.post(
       the response body should include a string exactly as follows: "username taken".
   */
 
-router.post("/login", checkBodyData, checkUserNameExists, async (req, res) => {
-  const { username, password } = req.body;
-  try {
-    const user = User.getUserBy({ username }).first();
-    if (user && bcrypt.compareSync(password, user.password)) {
-      const token = generateToken(user);
-      res.status(200).json({ message: `welcome ${user.username}`, token });
-    } else {
-      res.status(401).json({ message: "invalid credentials" });
+router.post(
+  "/login",
+  checkBodyData,
+  checkUserNameExists,
+  async (req, res, next) => {
+    let { username, password } = req.body;
+
+    try {
+      const user = await User.getUserBy({ username }).first();
+      console.log("user", user)
+      if (user && bcrypt.compareSync(password, user.password)) {
+        const token = generateToken(user);
+        res.status(200).json({ message: `welcome ${user.username}`, token });
+      } else {
+        res.status(401).json({ message: "invalid credentials" });
+      }
+    } catch (err) {
+      next(err);
     }
-  } catch (err) {
-    next(err);
   }
-});
+);
 /*
     IMPLEMENT
     You are welcome to build additional middlewares to help with the endpoint's functionality.
@@ -97,7 +104,7 @@ function generateToken(user) {
   const options = {
     expiresIn: "1h",
   };
-  const secret = JWT_SECRET;
+  const secret = JWT_SECRETE;
   return jwt.sign(payload, secret, options);
 }
 

@@ -12,6 +12,7 @@ async function checkBodyData(req, res, next) {
 async function checkUserNameExists(req, res, next) {
   try {
     const user = await User.getUserBy({ username: req.body.username });
+    
     if (user.length > 0) {
       next();
     } else {
